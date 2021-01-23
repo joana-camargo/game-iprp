@@ -4,12 +4,17 @@ PImage[] times_img;
 Tela tela;
 Tela[] telas;
 String[] times_nome;
+Player[] clones;
+
+int pontos = 0;
 
 int tlWidth = 509;
 int tlHeight = 720;
 
 int xcentro = tlWidth/2;
 int ycentro = tlHeight/2;
+
+PImage clone_img;
 
 void setup() {
     // size() de acordo com as variaveis tlWidth e tlHeight
@@ -20,6 +25,10 @@ void setup() {
     PImage tlGrama = loadImage("img/grama.png");
     PImage tlTimes = loadImage("img/times.png");
 
+    // mudar para o png certo do clone:
+    clone_img = loadImage("clone.png");
+
+    // times
     PImage time_cor = loadImage("img/time_cor.png");
     PImage time_fla = loadImage("img/time_fla.png");
     PImage time_flu = loadImage("img/time_flu.png");
@@ -38,7 +47,7 @@ void setup() {
     int sep = 90;
     Botao btJogar = new Botao("Jogar", 3, xcentro, ycentro + sep);
     Botao btTimes = new Botao("Times", 1, xcentro, ycentro + sep*2);
-    Botao btSair = new Botao("Sair", 0, tlWidth-70, 30, 125, 50);
+    Botao btSair = new Botao("Sair", 0, tlWidth-70, 28);
 
     // botoes disponiveis em cada tela
     Botao[] btsMenu = {btJogar, btTimes, btSair};
@@ -65,17 +74,32 @@ void setup() {
     tela.draw();
 
     player = new Player(times_img[0], xcentro, ycentro);
-
-    // botao de proximo clareia quando o usuario coletar N coins
-    // quando mudar de nivel, apenas mudar o background e aumentar a dificuldade
-    // aumenta a dificuldade diminuindo tempo para coletar moedas (?)
+    clones = new Player[3];
+    for (int i = 0; i < clones.length; i++) {
+        int randx = int(random(60, tlWidth-60));
+        int randy = int(random(60, tlHeight-60));
+        clones[i] = new Player(clone_img, randx, randy);
+    }
 }
 
 void draw() {
-    // antes do ID 3 sao apenas menus, nao niveis
+    // ID==3 eh o unico que necessita de atualizacao constante
     if (tela.id != 3) return;
 
     tela.draw();
+
+    for (int i = 0; i < clones.length; i++) {
+        clones[i].draw();
+        // quando colidir, deletar o clone adicionar +1 ponto e criar um novo clone
+        if (clones[i].colide(player.getX(), player.getY())) {
+            // usar 60 como margem, mantendo os clones longes da beirada
+            int randx = int(random(60, tlWidth-60));
+            int randy = int(random(60, tlHeight-60));
+            clones[i] = new Player(clone_img, randx, randy);
+            pontos += 1;
+            break;
+        }
+    }
     player.draw();
 }
 

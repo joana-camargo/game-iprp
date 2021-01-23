@@ -1,13 +1,17 @@
 class Botao {
-    String nome = "default";
+    String nome = "none";
     PImage img = null;
     int id;
     int x;
     int y;
+    int pxs = 46;
+    boolean hoverAtivo = false;
+    PFont mainFont = createFont("barcelona-2012.ttf", this.pxs);
+
 
     // width e height para os botoes, respectivamente
-    int rectw = 200;
-    int recth = 70;
+    int rectw = 150;
+    int recth = 60;
 
     // nome: para identificacao/debug
     // id: valor retornado quando for clicado
@@ -55,6 +59,8 @@ class Botao {
 
     // desenha botao centralizado com texto
     void draw() {
+        stroke(255);
+        strokeWeight(2);
         fill(0, 230);
         rectMode(CENTER);
         rect(this.x, this.y, rectw, recth);
@@ -64,9 +70,9 @@ class Botao {
             image(img, this.x, this.y, rectw*0.8, recth*0.8);
         } else {
             fill(255);
-            textSize(32);
+            textFont(mainFont);
             textAlign(CENTER);
-            text(nome, this.x, this.y+10);
+            text(nome, this.x, this.y+15);
         }
     }
 }
