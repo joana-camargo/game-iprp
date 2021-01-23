@@ -1,31 +1,24 @@
 class Tela {
-    PImage[] telas;
-    PImage tela;
-    int estado = 0;
+    Botao[] botoes;
+    PImage bg;
+    int id;
 
-    Tela(PImage[] telas) {
-        this.telas = telas;
-        this.tela = this.telas[0];
+    Tela(PImage bg, int id, Botao[] botoes) {
+        this.bg = bg;
+        this.id = id;
+        this.botoes = botoes;
     }
 
-    Tela(PImage tela) {
-        this.telas[0] = tela;
-        this.tela = this.telas[0];
-    }
-
-    void set(int n) {
-        this.estado = n;
-        this.tela = this.telas[n];
-        this.draw();
-    }
-
-    int get() {
-        return this.estado;
+    int id() {
+        return this.id;
     }
 
     void draw() {
-        imageMode(CORNER);
-        image(this.tela, 0, 0);
+        background(this.bg);
+        for (Botao b : botoes) b.draw();
     }
 
+    void setBg(PImage bg) {
+        this.bg = bg;
+    }
 }
