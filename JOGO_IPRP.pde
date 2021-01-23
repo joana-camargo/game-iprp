@@ -1,72 +1,98 @@
-Tela tela;
 Botao[] botoes;
-PImage[] naves = new PImage[6];
-PImage[] campos = new PImage[3];
+Nave nave;
+PImage[] img_naves;
+Tela tela;
+Tela[] telas;
 
-String[] naves_nomes = {"fla", "flu", "cor", "inter", "gre", "pal"};
-String[] campos_nomes = {"grama", "espaco", "deserto"};
+int tlWidth = 509;
+int tlHeight = 720;
 
-int estado = 0;
-//int estadoNaves = int(random(0, naves.length));
-int estadoNaves = 0;
-
-int tela_width = 509;
-int tela_height = 720;
+int xcentro = tlWidth/2;
+int ycentro = tlHeight/2;
 
 void setup() {
-    // como size() consegue ler apenas numeros,
-    // ajuste as variaveis tela_width e tela_height de acordo
+    // size() de acordo com as variaveis tlWidth e tlHeight
     size(509, 720);
 
     // carregar imagens
-    PImage tlMenu = loadImage("img/grama.png");
+    PImage tlMenu = loadImage("img/menu.png");
+    PImage tlGrama = loadImage("img/grama.png");
     PImage tlNaves = loadImage("img/naves.png");
-    PImage tlNiveis = loadImage("img/niveis.png");
-    PImage tlCreditos = loadImage("img/creditos.png");
-    PImage tlPerdeu = loadImage("img/perdeu.png");
-    PImage tlGanhou = loadImage("img/ganhou.png");
-    PImage[] telas = {tlMenu, tlNaves, tlNiveis, tlCreditos, tlPerdeu, tlGanhou};
 
-    tela = new Tela(telas);
-    tela.set(0);
+    PImage nave_cor = loadImage("img/nave_cor.png");
+    PImage nave_fla = loadImage("img/nave_fla.png");
+    PImage nave_flu = loadImage("img/nave_flu.png");
+    PImage nave_gre = loadImage("img/nave_gre.png");
+    PImage nave_int = loadImage("img/nave_int.png");
+    PImage nave_pal = loadImage("img/nave_pal.png");
 
-    for (int i = 0; i < naves_nomes.length; i++) {
-        // => "img/fla.png" ... para cada nave
-        naves[i] = loadImage("img/"+naves_nomes[i]+".png");
+    img_naves = new PImage[] {
+        nave_cor, nave_fla, nave_flu, nave_gre, nave_int, nave_pal
+    };
+
+    // criar objs de Botao
+    int sep = 90;
+    Botao btJogar = new Botao("Jogar", 3, xcentro, ycentro + sep);
+    Botao btNaves = new Botao("Naves", 1, xcentro, ycentro + sep*2);
+    Botao btSair = new Botao("Sair", 0, tlWidth-70, 30, 125, 50);
+
+    // botoes disponiveis em cada tela
+    Botao[] btsMenu = {btJogar, btNaves, btSair};
+    Botao[] btsNaves = new Botao[img_naves.length+1];
+    Botao[] btsNivel = {btSair};
+
+    // inicializar array de botoes da selecao de naves
+    for (int i = 0; i < img_naves.length; i++) {
+        if (i % 2 == 0) {
+            btsNaves[i] = new Botao(img_naves[i], 10+i, xcentro-sep, sep*(i+2), 125, 125);
+        } else {
+            btsNaves[i] = new Botao(img_naves[i], 10+i, xcentro+sep, sep*(i+1), 125, 125);
+        }
     }
+    btsNaves[btsNaves.length-1] = btSair;
 
-    for (int i = 0; i < campos.length; i++) {
-        // => "img/grama.png" ... para cada campo
-        campos[i] = loadImage("img/"+campos_nomes[i]+".png");
-    }
+    Tela menu = new Tela(tlMenu, 0, btsMenu);
+    Tela naves = new Tela(tlGrama, 1, btsNaves);
+    Tela creditos = new Tela(tlMenu, 2, btsMenu);
+    Tela nivel = new Tela(tlGrama, 3, btsNivel);
+    telas = new Tela[] {menu, naves, creditos, nivel};
 
-    Botao btNaves = new Botao("Naves", 1, tela_width/2, tela_height/2);
-    Botao btNiveis = new Botao("Niveis", 2, tela_width/2, tela_height/2+130);
-    Botao btSair = new Botao("Sair", 3, tela_width/2, tela_height/2+260);
-    botoes = new Botao[]{btNaves, btNiveis, btSair};
-
+    tela = telas[menu.id];
     tela.draw();
-    for (Botao b : botoes) {
-        b.draw();
-    }
 
-    // passar array de botoes pra tela
-    // quando chamar tela.draw() desenha os botoes designados pelo array
-    // tela.botoes = {btSair, btProxima};
+    nave = new Nave(img_naves[0], xcentro, ycentro);
 
-    // botao de proximo muda pra uma cor mais clara quando o usuario coletar X
-    // coins
+    // botao de proximo clareia quando o usuario coletar N coins
+    // quando mudar de nivel, apenas mudar o background e aumentar a dificuldade
+    // aumenta a dificuldade diminuindo tempo para coletar moedas (?)
 }
 
-void draw() {}
+void draw() {
+    // antes do ID 3 sao apenas menus, nao niveis
+    if (tela.id != 3) return;
+
+    tela.draw();
+    nave.draw();
+}
+
+void keyPressed() {
+    nave.move(keyCode, tlWidth, tlHeight);
+}
 
 void mousePressed() {
-    println(mouseX, mouseY);
-    for (Botao b : botoes) {
-        int tela_id = b.colide(mouseX, mouseY);
-        if (tela_id > 0) {
-            tela.set(tela_id);
-            println("colide");
+    for (Botao b : tela.botoes) {
+        int rval = b.colide(mouseX, mouseY);
+        if (rval == 0 && tela.id == 0) {
+            exit();
+            break;
+        } else if (rval >= 0) {
+            if (rval > 9) {
+                nave.setSprite(img_naves[rval-10]);
+                tela = telas[0];
+            } else {
+                tela = telas[rval];
+            }
+            tela.draw();
             break;
         }
     }
