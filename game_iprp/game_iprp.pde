@@ -97,7 +97,7 @@ void setup() {
 }
 
 void draw() {
-    if (tela.id != telas.length) return;
+    if (tela.id != 4) return;
 
     tela.draw();
 
@@ -124,22 +124,6 @@ void mousePressed() {
     for (Botao b : tela.botoes) {
         int rval = b.colide(mouseX, mouseY);
         println(rval);
-        // if (rval == 0 && tela.id == 0) {
-        //     exit();
-        //     break;
-        // } else if (rval >= 20) {
-        //     telas[4].setBg(campos_img[rval-20]);
-        //     tela = telas[0];
-        //     break;
-        // } else if (rval >= 10) {
-        //     player.setSprite(times_img[rval-10]);
-        //     tela = telas[0];
-        // } else if (rval >= 0) {
-        //     tela = telas[rval];
-        //     tela.draw();
-        //     break;
-        // }
-
         if (rval == 0 && tela.id == 0) {
             exit();
             break;
