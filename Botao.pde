@@ -4,9 +4,6 @@ class Botao {
     int id;
     int x;
     int y;
-    int pxs = 46;
-    PFont mainFont = createFont("barcelona-2012.ttf", this.pxs);
-
 
     // width e height para os botoes, respectivamente
     int rectw = 150;
@@ -59,7 +56,6 @@ class Botao {
             image(img, this.x*2-this.x/4, this.y, img.width*0.2, img.height*0.2);
         }
         fill(0);
-        textFont(mainFont);
         textAlign(CENTER);
         text(nome, this.x, this.y+15);
         noFill();

@@ -1,17 +1,25 @@
 import processing.sound.*;
 
-Botao[] botoes;
+
 PImage[] campos_img;
 PImage[] times_img;
+String[] times_nome;
+
 Player player;
 Player[] clones;
+PImage clone_img;
 Player[] obstaculos;
-String[] times_nome;
+
 Tela tela;
+Tela[] telas;
+
+Botao[] botoes;
+
 SoundFile aud_ponto;
 SoundFile aud_ganhar;
 SoundFile aud_perder;
-Tela[] telas;
+
+PFont mainFont;
 
 int pontos = 0;
 
@@ -21,11 +29,14 @@ int tlHeight = 720;
 int xcentro = tlWidth/2;
 int ycentro = tlHeight/2;
 
-PImage clone_img;
 
 void setup() {
     // size() de acordo com as variaveis tlWidth e tlHeight
     size(509, 720);
+
+    // inicializar fonte
+    PFont mainFont = createFont("barcelona-2012.ttf", 46);
+    textFont(mainFont);
 
     // carregar audios
     aud_ponto = new SoundFile(this, "wav/ponto.wav");
@@ -112,6 +123,14 @@ void draw() {
     if (tela.id != 4) return;
 
     tela.draw();
+
+    // retangulo branco que contem a vida e os pontos
+    fill(255, 200);
+    rect(tlWidth/2, 0, tlWidth+10, 150, 20);
+    noFill();
+
+    fill(0);
+    text(pontos+"  golos", tlWidth-100, 50);
 
     for (int i = 0; i < clones.length; i++) {
         clones[i].draw();
