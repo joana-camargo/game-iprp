@@ -3,12 +3,19 @@ class Player {
     int x = 0;
     int y = 0;
     int dt = 10;
-    int w = 60;
+    int w = 55;
 
     Player(PImage sprite, int x, int y) {
         this.sprite = sprite;
         this.x = x;
         this.y = y;
+    }
+
+    Player(PImage sprite, int x, int y, int w) {
+        this.sprite = sprite;
+        this.x = x;
+        this.y = y;
+        this.w = w;
     }
 
     void setSprite(PImage sprite) {

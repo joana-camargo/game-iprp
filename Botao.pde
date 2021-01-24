@@ -5,7 +5,6 @@ class Botao {
     int x;
     int y;
     int pxs = 46;
-    boolean hoverAtivo = false;
     PFont mainFont = createFont("barcelona-2012.ttf", this.pxs);
 
 
@@ -23,19 +22,10 @@ class Botao {
         this.y = y;
     }
 
-    // inicializar especificando dimensoes para o rect()
-    Botao(String nome, int id, int x, int y, int rectw, int recth) {
-        this.nome = nome;
-        this.id = id;
-        this.x = x;
-        this.y = y;
-        this.rectw = rectw;
-        this.recth = recth;
-    }
-
-    // inicializar com dimensoes customizadas e imagem
-    Botao(PImage img, int id, int x, int y, int rectw, int recth) {
+    // inicializar especificando dimensoes, nome e imagem
+    Botao(PImage img, String nome, int id, int x, int y, int rectw, int recth) {
         this.img = img;
+        this.nome = nome;
         this.id = id;
         this.x = x;
         this.y = y;
@@ -59,20 +49,19 @@ class Botao {
 
     // desenha botao centralizado com texto
     void draw() {
-        stroke(255);
-        strokeWeight(2);
-        fill(0, 230);
+        noStroke();
         rectMode(CENTER);
         rect(this.x, this.y, rectw, recth);
 
         if (this.img != null) {
             imageMode(CENTER);
-            image(img, this.x, this.y, rectw*0.8, recth*0.8);
-        } else {
-            fill(255);
-            textFont(mainFont);
-            textAlign(CENTER);
-            text(nome, this.x, this.y+15);
+            image(img, this.x/4, this.y, img.width*0.2, img.height*0.2);
+            image(img, this.x*2-this.x/4, this.y, img.width*0.2, img.height*0.2);
         }
+        fill(0);
+        textFont(mainFont);
+        textAlign(CENTER);
+        text(nome, this.x, this.y+15);
+        noFill();
     }
 }
