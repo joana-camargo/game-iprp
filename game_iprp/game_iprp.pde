@@ -1,10 +1,16 @@
+import processing.sound.*;
+
 Botao[] botoes;
 PImage[] campos_img;
 PImage[] times_img;
 Player player;
 Player[] clones;
+Player[] obstaculos;
 String[] times_nome;
 Tela tela;
+SoundFile aud_ponto;
+SoundFile aud_ganhar;
+SoundFile aud_perder;
 Tela[] telas;
 
 int pontos = 0;
@@ -20,6 +26,11 @@ PImage clone_img;
 void setup() {
     // size() de acordo com as variaveis tlWidth e tlHeight
     size(509, 720);
+
+    // carregar audios
+    aud_ponto = new SoundFile(this, "wav/ponto.wav");
+    aud_ganhar = new SoundFile(this, "wav/ganhar.wav");
+    aud_perder = new SoundFile(this, "wav/perder.wav");
 
     // carregar imagens
     PImage tlMenu = loadImage("img/menu.png");
@@ -55,13 +66,13 @@ void setup() {
     Botao btJogar = new Botao("Jogar", 4, xcentro, ycentro + sep);
     Botao btCampos = new Botao("Campos", 1, xcentro, ycentro + sep*2);
     Botao btTimes = new Botao("Times", 2, xcentro, ycentro + sep*3);
-    Botao btSair = new Botao(null, "Sair", 0, tlWidth-70, 28, 130, 50);
+    Botao btSair = new Botao(null, "Sair", 0, 50, 30, 130, 50);
 
     // botoes disponiveis em cada tela
     Botao[] btsMenu = {btJogar, btCampos, btTimes, btSair};
     Botao[] btsTimes = new Botao[times_img.length+1];
     Botao[] btsCampos = new Botao[campos_img.length+1];
-    Botao[] btsNivel = {btSair};
+    Botao[] btsNivel = {};
 
     // inicializar array de botoes da tela de times (tlTimes)
     for (int i = 0; i < times_img.length; i++) {
@@ -88,12 +99,13 @@ void setup() {
     player = new Player(times_img[0], xcentro, ycentro);
 
     // tamanho do array = numero max. de clones
-    clones = new Player[6];
+    clones = new Player[5];
     for (int i = 0; i < clones.length; i++) {
         int randx = int(random(60, tlWidth-60));
         int randy = int(random(60, tlHeight-60));
         clones[i] = new Player(clone_img, randx, randy, 35);
     }
+    aud_ponto.play();
 }
 
 void draw() {
@@ -110,6 +122,7 @@ void draw() {
             int randy = int(random(60, tlHeight-60));
             clones[i] = new Player(clone_img, randx, randy, 35);
             pontos += 1;
+            aud_ponto.play();
             break;
         }
     }
@@ -123,7 +136,6 @@ void keyPressed() {
 void mousePressed() {
     for (Botao b : tela.botoes) {
         int rval = b.colide(mouseX, mouseY);
-        println(rval);
         if (rval == 0 && tela.id == 0) {
             exit();
             break;
