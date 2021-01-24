@@ -34,7 +34,8 @@ int clones_width = 35;
 int obstaculos_width = clones_width*2;
 
 int player_pontos = 0;
-int player_hp = 5;
+int player_hp = 3;
+int nNivel = 1;
 
 void setup() {
     // size() de acordo com as variaveis tlWidth e tlHeight
@@ -53,6 +54,8 @@ void setup() {
     PImage tlMenu = loadImage("img/menu.png");
     PImage tlTimes = loadImage("img/times.png");
     PImage tlCampos = loadImage("img/times.png");
+    PImage tlPerder = loadImage("img/perder.png");
+    PImage tlGanhar = loadImage("img/ganhar.png");
 
     clone_img = loadImage("img/bola.png");
     cone_img = loadImage("img/cone.png");
@@ -60,10 +63,10 @@ void setup() {
 
     // campos
     PImage campo_grama = loadImage("img/campo_grama.png");
-    PImage campo_espaco = loadImage("img/campo_espaco.png");
     PImage campo_deserto = loadImage("img/campo_deserto.png");
+    PImage campo_espaco = loadImage("img/campo_espaco.png");
     campos_img = new PImage[] {
-        campo_grama, campo_espaco, campo_deserto
+        campo_grama, campo_deserto, campo_espaco
     };
 
     // times
@@ -85,7 +88,7 @@ void setup() {
     Botao btJogar = new Botao("Jogar", 4, xcentro, ycentro + sep);
     Botao btCampos = new Botao("Campos", 1, xcentro, ycentro + sep*2);
     Botao btTimes = new Botao("Times", 2, xcentro, ycentro + sep*3);
-    Botao btSair = new Botao(null, "Sair", 0, 50, 30, 130, 50);
+    Botao btSair = new Botao(loadImage("img/seta.png"), "", 0, 50, 30, 60, 60);
 
     // botoes disponiveis em cada tela
     Botao[] btsMenu = {btJogar, btCampos, btTimes, btSair};
@@ -102,8 +105,8 @@ void setup() {
 
     // botoes na tela de campos
     btsCampos[0] = new Botao(campo_grama, "clássico", 20, xcentro, sep*3, tlWidth+2, 80);
-    btsCampos[1] = new Botao(campo_espaco, "espaço", 21, xcentro, sep*5, tlWidth+2, 80);
-    btsCampos[2] = new Botao(campo_deserto, "deserto", 22, xcentro, sep*7, tlWidth+2, 80);
+    btsCampos[2] = new Botao(campo_deserto, "deserto", 21, xcentro, sep*5, tlWidth+2, 80);
+    btsCampos[1] = new Botao(campo_espaco, "espaço", 22, xcentro, sep*7, tlWidth+2, 80);
     btsCampos[3] = btSair;
 
     // telas
@@ -112,9 +115,9 @@ void setup() {
     Tela campos = new Tela(tlCampos, 2, btsCampos);
     Tela creditos = new Tela(tlMenu, 3, btsMenu);
     Tela nivel = new Tela(campos_img[0], 4, btsNivel);
-    //Tela perdeu = new Tela(tlPerdeu, 5, {});
-    //Tela ganhou = new Tela(tlGanhou, 6, {});
-    telas = new Tela[] {menu, campos, times, creditos, nivel};
+    Tela perder = new Tela(tlPerder, 5, btsBasico);
+    Tela ganhar = new Tela(tlGanhar, 6, btsBasico);
+    telas = new Tela[] {menu, campos, times, creditos, nivel, perder, ganhar};
 
     tela = telas[menu.id];
     tela.draw();
@@ -135,22 +138,74 @@ void setup() {
         int randy = int(random(60, tlHeight-60));
         obstaculos[i] = new Player(cone_img, randx, randy, obstaculos_width);
     }
+
     aud_ponto.play();
 }
 
 void draw() {
-    if (tela.id != 4) return;
     if (player_hp < 1) {
-        tela = telas[0];
+        // perdeu o jogo
+        tela = telas[5];
         tela.draw();
+        aud_perder.play();
+        resetGame();
         return;
+    } else if (player_pontos >= nNivel*5) {
+        player_pontos = 0;
+        player_hp += 1;
+        nNivel += 1;
+        if (nNivel > campos_img.length) {
+            // ganhou o jogo
+            tela = telas[6];
+            tela.draw();
+            aud_ganhar.play();
+            resetGame();
+            return;
+        }
+        tela.setBg(campos_img[nNivel-1]);
     }
 
+    if (tela.id != 4) return;
     tela.draw();
 
-    // retangulo branco de bg para a vida e os pontos
+    // atualizar clones
+    for (int i = 0; i < clones.length; i++) {
+        // quando colidir, deletar o clone adicionar +1 ponto e criar um novo clone
+        if (clones[i].colide(player.getX(), player.getY())) {
+            // usar 60 como margem, mantendo os clones longes da beirada
+            int randx = int(random(60, tlWidth-60));
+            int randy = int(random(60, tlHeight-60));
+            clones[i] = new Player(clone_img, randx, randy, clones_width);
+            player_pontos += 1;
+            aud_ponto.play();
+            break;
+        }
+        clones[i].draw();
+    }
+
+    // atualizar obstaculos
+    for (int i = 0; i < obstaculos.length; i++) {
+        if (obstaculos[i] == null) {
+            int randx = int(random(60, tlWidth-60));
+            int randy = int(random(60, tlHeight-60));
+            obstaculos[i] = new Player(cone_img, randx, randy, obstaculos_width);
+        } else if (obstaculos[i].colide(player.getX(), player.getY())) {
+            // quando colidir, deletar o clone subtrair 1 de player_hp e criar um novo clone
+            int randx = int(random(60, tlWidth-60));
+            int randy = int(random(60, tlHeight-60));
+            obstaculos[i] = new Player(cone_img, randx, randy, obstaculos_width);
+            player_hp -= 1;
+            aud_hit.play();
+            break;
+        }
+        obstaculos[i].draw();
+    }
+
+    player.draw();
+
+    // rect branco de fundo
     fill(255, 200);
-    rect(tlWidth/2, 0, tlWidth+10, 150, 20);
+    rect(tlWidth/2, 0, tlWidth+10, 150, 40);
     noFill();
 
     // mostra quanto o player tem de HP
@@ -163,35 +218,6 @@ void draw() {
     text(player_pontos+"  golos", tlWidth-100, 50);
     noFill();
 
-    for (int i = 0; i < clones.length; i++) {
-        clones[i].draw();
-        // quando colidir, deletar o clone adicionar +1 ponto e criar um novo clone
-        if (clones[i].colide(player.getX(), player.getY())) {
-            // usar 60 como margem, mantendo os clones longes da beirada
-            int randx = int(random(60, tlWidth-60));
-            int randy = int(random(60, tlHeight-60));
-            clones[i] = new Player(clone_img, randx, randy, clones_width);
-            player_pontos += 1;
-            aud_ponto.play();
-            break;
-        }
-    }
-
-    for (int i = 0; i < obstaculos.length; i++) {
-        obstaculos[i].draw();
-        // quando colidir, deletar o clone subtrair 1 de player_hp e criar um novo clone
-        if (obstaculos[i].colide(player.getX(), player.getY())) {
-            // usar 60 como margem, mantendo os clones longes da beirada
-            int randx = int(random(60, tlWidth-60));
-            int randy = int(random(60, tlHeight-60));
-            obstaculos[i] = new Player(cone_img, randx, randy, obstaculos_width);
-            player_hp -= 1;
-            aud_hit.play();
-            break;
-        }
-    }
-
-    player.draw();
 }
 
 void keyPressed() {
@@ -207,9 +233,11 @@ void mousePressed() {
         } else if (rval >= 0) {
             if (rval >= 20) {
                 telas[4].setBg(campos_img[rval-20]);
-                tela = telas[0];
+                // vai para a tela de times
+                tela = telas[2];
             } else if (rval >= 10) {
                 player.setSprite(times_img[rval-10]);
+                // volta para a tela do menu principal
                 tela = telas[0];
             } else {
                 tela = telas[rval];
@@ -218,4 +246,10 @@ void mousePressed() {
             break;
         }
     }
+}
+
+void resetGame() {
+    nNivel = 1;
+    player_pontos = 0;
+    player_hp = 3;
 }

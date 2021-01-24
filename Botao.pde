@@ -52,8 +52,12 @@ class Botao {
 
         if (this.img != null) {
             imageMode(CENTER);
-            image(img, this.x/4, this.y, img.width*0.2, img.height*0.2);
-            image(img, this.x*2-this.x/4, this.y, img.width*0.2, img.height*0.2);
+            if (this.nome == "") {
+                image(img, this.x, this.y, rectw, recth);
+            } else {
+                image(img, this.x/4, this.y, img.width*0.2, img.height*0.2);
+                image(img, this.x*2-this.x/4, this.y, img.width*0.2, img.height*0.2);
+            }
         }
         fill(0);
         textAlign(CENTER);
