@@ -85,9 +85,9 @@ void setup() {
 
     // objs de Botao
     int sep = 90;
-    Botao btJogar = new Botao("Jogar", 4, xcentro, ycentro + sep);
-    Botao btCampos = new Botao("Campos", 1, xcentro, ycentro + sep*2);
-    Botao btTimes = new Botao("Times", 2, xcentro, ycentro + sep*3);
+    Botao btJogar = new Botao("Jogar", 2, xcentro, ycentro + sep);
+    Botao btCampos = new Botao("Campos", 1, xcentro, ycentro + sep*3);
+    Botao btTimes = new Botao("Times", 2, xcentro, ycentro + sep*2);
     Botao btSair = new Botao(loadImage("img/seta.png"), "", 0, 50, 30, 60, 60);
 
     // botoes disponiveis em cada tela
@@ -215,7 +215,7 @@ void draw() {
 
     // mostra quantas bolas foram coletadas
     fill(0);
-    text(player_pontos+"  golos", tlWidth-100, 50);
+    text(player_pontos+" golos", tlWidth-100, 50);
     noFill();
 
 }
@@ -234,11 +234,11 @@ void mousePressed() {
             if (rval >= 20) {
                 telas[4].setBg(campos_img[rval-20]);
                 // vai para a tela de times
-                tela = telas[2];
+                tela = telas[4];
             } else if (rval >= 10) {
                 player.setSprite(times_img[rval-10]);
                 // volta para a tela do menu principal
-                tela = telas[0];
+                tela = telas[1];
             } else {
                 tela = telas[rval];
             }
