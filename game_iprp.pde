@@ -1,13 +1,15 @@
 import processing.sound.*;
 
-
 PImage[] campos_img;
 PImage[] times_img;
 String[] times_nome;
 
+PImage clone_img;
+PImage cone_img;
+PImage taca_img;
+
 Player player;
 Player[] clones;
-PImage clone_img;
 Player[] obstaculos;
 
 Tela tela;
@@ -18,10 +20,9 @@ Botao[] botoes;
 SoundFile aud_ponto;
 SoundFile aud_ganhar;
 SoundFile aud_perder;
+SoundFile aud_hit;
 
 PFont mainFont;
-
-int pontos = 0;
 
 int tlWidth = 509;
 int tlHeight = 720;
@@ -29,26 +30,33 @@ int tlHeight = 720;
 int xcentro = tlWidth/2;
 int ycentro = tlHeight/2;
 
+int clones_width = 35;
+int obstaculos_width = clones_width*2;
+
+int player_pontos = 0;
+int player_hp = 5;
 
 void setup() {
     // size() de acordo com as variaveis tlWidth e tlHeight
     size(509, 720);
 
-    // inicializar fonte
     PFont mainFont = createFont("barcelona-2012.ttf", 46);
     textFont(mainFont);
 
-    // carregar audios
+    // audios
     aud_ponto = new SoundFile(this, "wav/ponto.wav");
     aud_ganhar = new SoundFile(this, "wav/ganhar.wav");
     aud_perder = new SoundFile(this, "wav/perder.wav");
+    aud_hit = new SoundFile(this, "wav/hit.wav");
 
-    // carregar imagens
+    // imagens
     PImage tlMenu = loadImage("img/menu.png");
     PImage tlTimes = loadImage("img/times.png");
     PImage tlCampos = loadImage("img/times.png");
 
     clone_img = loadImage("img/bola.png");
+    cone_img = loadImage("img/cone.png");
+    taca_img = loadImage("img/taca.png");
 
     // campos
     PImage campo_grama = loadImage("img/campo_grama.png");
@@ -72,7 +80,7 @@ void setup() {
         "Corinthians", "Flamengo", "Fluminense", "Gremio", "Internacional", "Palmeiras"
     };
 
-    // criar objs de Botao
+    // objs de Botao
     int sep = 90;
     Botao btJogar = new Botao("Jogar", 4, xcentro, ycentro + sep);
     Botao btCampos = new Botao("Campos", 1, xcentro, ycentro + sep*2);
@@ -84,6 +92,7 @@ void setup() {
     Botao[] btsTimes = new Botao[times_img.length+1];
     Botao[] btsCampos = new Botao[campos_img.length+1];
     Botao[] btsNivel = {};
+    Botao[] btsBasico = {btSair};
 
     // inicializar array de botoes da tela de times (tlTimes)
     for (int i = 0; i < times_img.length; i++) {
@@ -91,6 +100,7 @@ void setup() {
     }
     btsTimes[btsTimes.length-1] = btSair;
 
+    // botoes na tela de campos
     btsCampos[0] = new Botao(campo_grama, "clássico", 20, xcentro, sep*3, tlWidth+2, 80);
     btsCampos[1] = new Botao(campo_espaco, "espaço", 21, xcentro, sep*5, tlWidth+2, 80);
     btsCampos[2] = new Botao(campo_deserto, "deserto", 22, xcentro, sep*7, tlWidth+2, 80);
@@ -102,6 +112,8 @@ void setup() {
     Tela campos = new Tela(tlCampos, 2, btsCampos);
     Tela creditos = new Tela(tlMenu, 3, btsMenu);
     Tela nivel = new Tela(campos_img[0], 4, btsNivel);
+    //Tela perdeu = new Tela(tlPerdeu, 5, {});
+    //Tela ganhou = new Tela(tlGanhou, 6, {});
     telas = new Tela[] {menu, campos, times, creditos, nivel};
 
     tela = telas[menu.id];
@@ -114,23 +126,42 @@ void setup() {
     for (int i = 0; i < clones.length; i++) {
         int randx = int(random(60, tlWidth-60));
         int randy = int(random(60, tlHeight-60));
-        clones[i] = new Player(clone_img, randx, randy, 35);
+        clones[i] = new Player(clone_img, randx, randy, clones_width);
+    }
+
+    obstaculos = new Player[3];
+    for (int i = 0; i < obstaculos.length; i++) {
+        int randx = int(random(60, tlWidth-60));
+        int randy = int(random(60, tlHeight-60));
+        obstaculos[i] = new Player(cone_img, randx, randy, obstaculos_width);
     }
     aud_ponto.play();
 }
 
 void draw() {
     if (tela.id != 4) return;
+    if (player_hp < 1) {
+        tela = telas[0];
+        tela.draw();
+        return;
+    }
 
     tela.draw();
 
-    // retangulo branco que contem a vida e os pontos
+    // retangulo branco de bg para a vida e os pontos
     fill(255, 200);
     rect(tlWidth/2, 0, tlWidth+10, 150, 20);
     noFill();
 
+    // mostra quanto o player tem de HP
+    for (int i = 0; i < player_hp; i++) {
+        image(taca_img, 50*(i+1), 40, taca_img.width*0.2, taca_img.height*0.2);
+    }
+
+    // mostra quantas bolas foram coletadas
     fill(0);
-    text(pontos+"  golos", tlWidth-100, 50);
+    text(player_pontos+"  golos", tlWidth-100, 50);
+    noFill();
 
     for (int i = 0; i < clones.length; i++) {
         clones[i].draw();
@@ -139,12 +170,27 @@ void draw() {
             // usar 60 como margem, mantendo os clones longes da beirada
             int randx = int(random(60, tlWidth-60));
             int randy = int(random(60, tlHeight-60));
-            clones[i] = new Player(clone_img, randx, randy, 35);
-            pontos += 1;
+            clones[i] = new Player(clone_img, randx, randy, clones_width);
+            player_pontos += 1;
             aud_ponto.play();
             break;
         }
     }
+
+    for (int i = 0; i < obstaculos.length; i++) {
+        obstaculos[i].draw();
+        // quando colidir, deletar o clone subtrair 1 de player_hp e criar um novo clone
+        if (obstaculos[i].colide(player.getX(), player.getY())) {
+            // usar 60 como margem, mantendo os clones longes da beirada
+            int randx = int(random(60, tlWidth-60));
+            int randy = int(random(60, tlHeight-60));
+            obstaculos[i] = new Player(cone_img, randx, randy, obstaculos_width);
+            player_hp -= 1;
+            aud_hit.play();
+            break;
+        }
+    }
+
     player.draw();
 }
 
