@@ -124,7 +124,7 @@ void setup() {
     tela = telas[menu.id];
     tela.draw();
 
-    player = new Player(times_img[0], xcentro, ycentro);
+    player = new Player(times_img[0], xcentro, ycentro+ycentro/2);
 
     // tamanho do array = numero max. de clones
     obstaculos = new Player[1];
@@ -146,7 +146,7 @@ void draw() {
         aud_perder.play();
         resetGame();
         return;
-    } else if (player_pontos >= nNivel*5) {
+    } else if (player_pontos >= nNivel*2) {
         player_pontos = 0;
         player_hp += 1;
         nNivel += 1;
@@ -183,26 +183,24 @@ void draw() {
     // atualizar obstaculos
     for (int i = 0; i < obstaculos.length; i++) {
         if (obstaculos[i] == null) {
-            obstaculos[i] = new Player(cone_img, xcentro, (i+1)*60, obstaculos_width);
+            obstaculos[i] = new Player(cone_img, xcentro, (ycentro+i)*10, obstaculos_width);
         } else if (obstaculos[i].colide(player.getX(), player.getY())) {
             // quando colidir, deletar o clone subtrair 1 de player_hp e criar um novo clone
-            obstaculos[i] = new Player(cone_img, xcentro, (i+1)*60, obstaculos_width);
+            obstaculos[i] = new Player(cone_img, xcentro, (i+1)*30, obstaculos_width);
             player.move_para(-1, player.getY() + 90);
             player_hp -= 1;
             aud_hit.play();
-
         }
 
         // cada nivel com movimentacao diferente
         if (nNivel == 1) {
             // movimento lateral
-            obstaculos[i].move_para(mv_offset % width, int(height/2.5));
-            mv_offset += 6;
+            obstaculos[i].move_para(mv_offset, int(height/2.5));
+            mv_offset %= width;
         } else if (nNivel == 2) {
             // movimento circular
             obstaculos[i].move_para(int(width/2+90*cos(alfa)) - i*20,
-                                    int(height/2+90*sin(alfa)) + (i*width/2) - 200);
-            alfa += PI/200;
+                                    int(height/2+90*sin(alfa)) + (i*width/2) - 240);
         } else {
             // movimento aleatorio
             obstaculos[i].move_para(obstaculos[i].getX()+v1, obstaculos[i].getY()+v2);
@@ -237,6 +235,8 @@ void draw() {
     fill(0);
     text(player_pontos+" golos", width-100, 50);
     noFill();
+    mv_offset += 3;
+    alfa += PI/120;
 }
 
 void keyPressed() {
@@ -271,4 +271,8 @@ void resetGame() {
     nNivel = 1;
     player_pontos = 0;
     player_hp = 3;
+    mv_offset = 0;
+    alfa = 0;
+    v1 = 3;
+    v2 = 2;
 }
