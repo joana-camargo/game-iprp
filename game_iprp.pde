@@ -150,6 +150,7 @@ void draw() {
     } else if (player_pontos >= nNivel*5) {
         player_hp += 1;
         nNivel += 1;
+        delay(500);
         if (nNivel > campos_img.length) {
             // ganhou o jogo
             tela = telas[6];
@@ -184,11 +185,11 @@ void draw() {
     // atualizar obstaculos
     for (int i = 0; i < obstaculos.length; i++) {
         if (obstaculos[i] == null) {
-            obstaculos[i] = new Player(cone_img, xcentro, (ycentro+i)*10, obstaculos_width);
+            obstaculos[i] = new Player(cone_img, int(random(width)), int(random(height)), obstaculos_width);
         } else if (obstaculos[i].colide(player.getX(), player.getY())) {
             // quando colidir, deletar o clone subtrair 1 de player_hp e criar um novo clone
-            obstaculos[i] = new Player(cone_img, xcentro, (i+1)*30, obstaculos_width);
-            player.move_para(-1, player.getY() + 90);
+            obstaculos[i] = new Player(cone_img, int(random(width)), int(random(height)), obstaculos_width);
+            player.move_para(-1, (player.getY() + 70)%height);
             player_hp -= 1;
             aud_hit.play();
         }
@@ -200,15 +201,14 @@ void draw() {
             mv_offset %= width;
         } else if (nNivel == 2) {
             // movimento circular
-            obstaculos[i].move_para(int(width/2+90*cos(alfa)) - i*20,
-                                    int(height/2+90*sin(alfa)) + (i*width/2) - 240);
+            obstaculos[i].move_para(int(width/2+90*cos(alfa)) - i*20, int(height/2+90*sin(alfa)) + (i*width/2) - 240);
         } else {
             // movimento aleatorio
             obstaculos[i].move_para(obstaculos[i].getX()+v1, obstaculos[i].getY()+v2);
             if (obstaculos[i].getX() >= width-10) {
                 v1 = -v1;
             }
-            if (obstaculos[i].getY() >= height-10){
+            if (obstaculos[i].getY() >= height-10) {
                 v2 = -v2;
             }
             if (obstaculos[i].getX() <= 10) {
