@@ -24,11 +24,8 @@ SoundFile aud_hit;
 
 PFont mainFont;
 
-int tlWidth = 509;
-int tlHeight = 720;
-
-int xcentro = tlWidth/2;
-int ycentro = tlHeight/2;
+int xcentro;
+int ycentro;
 
 int clones_width = 35;
 int obstaculos_width = clones_width*2;
@@ -37,10 +34,15 @@ int player_pontos = 0;
 int player_hp = 3;
 int nNivel = 1;
 
-void setup() {
-    // size() de acordo com as variaveis tlWidth e tlHeight
-    size(509, 720);
+int mv_offset = 0;
+float alfa = 0;
+int v1=3;
+int v2=2;
 
+void setup() {
+    size(509, 720);
+    xcentro = width/2;
+    ycentro = height/2;
     PFont mainFont = createFont("barcelona-2012.ttf", 46);
     textFont(mainFont);
 
@@ -53,7 +55,7 @@ void setup() {
     // imagens
     PImage tlMenu = loadImage("img/menu.png");
     PImage tlTimes = loadImage("img/times.png");
-    PImage tlCampos = loadImage("img/times.png");
+    PImage tlCampos = loadImage("img/campos.png");
     PImage tlPerder = loadImage("img/perder.png");
     PImage tlGanhar = loadImage("img/ganhar.png");
 
@@ -99,14 +101,14 @@ void setup() {
 
     // inicializar array de botoes da tela de times (tlTimes)
     for (int i = 0; i < times_img.length; i++) {
-        btsTimes[i] = new Botao(times_img[i], times_nome[i], 10+i, xcentro, sep*(i+2), tlWidth+2, 60);
+        btsTimes[i] = new Botao(times_img[i], times_nome[i], 10+i, xcentro, sep*(i+2), width+2, 60);
     }
     btsTimes[btsTimes.length-1] = btSair;
 
     // botoes na tela de campos
-    btsCampos[0] = new Botao(campo_grama, "clássico", 20, xcentro, sep*3, tlWidth+2, 80);
-    btsCampos[2] = new Botao(campo_deserto, "deserto", 21, xcentro, sep*5, tlWidth+2, 80);
-    btsCampos[1] = new Botao(campo_espaco, "espaço", 22, xcentro, sep*7, tlWidth+2, 80);
+    btsCampos[0] = new Botao(campo_grama, "clássico", 20, xcentro, sep*3, width+2, 80);
+    btsCampos[2] = new Botao(campo_deserto, "deserto", 21, xcentro, sep*5, width+2, 80);
+    btsCampos[1] = new Botao(campo_espaco, "espaço", 22, xcentro, sep*7, width+2, 80);
     btsCampos[3] = btSair;
 
     // telas
@@ -125,18 +127,12 @@ void setup() {
     player = new Player(times_img[0], xcentro, ycentro);
 
     // tamanho do array = numero max. de clones
+    obstaculos = new Player[1];
     clones = new Player[5];
     for (int i = 0; i < clones.length; i++) {
-        int randx = int(random(60, tlWidth-60));
-        int randy = int(random(60, tlHeight-60));
+        int randx = int(random(60, width-60));
+        int randy = int(random(60, height-60));
         clones[i] = new Player(clone_img, randx, randy, clones_width);
-    }
-
-    obstaculos = new Player[1];
-    for (int i = 0; i < obstaculos.length; i++) {
-        int randx = int(random(60, tlWidth-60));
-        int randy = int(random(60, tlHeight-60));
-        obstaculos[i] = new Player(cone_img, randx, randy, obstaculos_width);
     }
 
     aud_ponto.play();
@@ -174,8 +170,8 @@ void draw() {
         // quando colidir, deletar o clone adicionar +1 ponto e criar um novo clone
         if (clones[i].colide(player.getX(), player.getY())) {
             // usar 60 como margem, mantendo os clones longes da beirada
-            int randx = int(random(60, tlWidth-60));
-            int randy = int(random(60, tlHeight-60));
+            int randx = int(random(60, width-60));
+            int randy = int(random(60, height-60));
             clones[i] = new Player(clone_img, randx, randy, clones_width);
             player_pontos += 1;
             aud_ponto.play();
@@ -186,28 +182,50 @@ void draw() {
 
     // atualizar obstaculos
     for (int i = 0; i < obstaculos.length; i++) {
-        // inicializar obstaculo, caso seja nulo
         if (obstaculos[i] == null) {
-            int randx = int(random(60, tlWidth-60));
-            int randy = int(random(60, tlHeight-60));
-            obstaculos[i] = new Player(cone_img, randx, randy, obstaculos_width);
+            obstaculos[i] = new Player(cone_img, xcentro, (i+1)*60, obstaculos_width);
         } else if (obstaculos[i].colide(player.getX(), player.getY())) {
             // quando colidir, deletar o clone subtrair 1 de player_hp e criar um novo clone
-            int randx = int(random(60, tlWidth-60));
-            int randy = int(random(60, tlHeight-60));
-            obstaculos[i] = new Player(cone_img, randx, randy, obstaculos_width);
+            obstaculos[i] = new Player(cone_img, xcentro, (i+1)*60, obstaculos_width);
+            player.move_para(-1, player.getY() + 90);
             player_hp -= 1;
             aud_hit.play();
-            break;
+
+        }
+
+        // cada nivel com movimentacao diferente
+        if (nNivel == 1) {
+            // movimento lateral
+            obstaculos[i].move_para(mv_offset % width, int(height/2.5));
+            mv_offset += 6;
+        } else if (nNivel == 2) {
+            // movimento circular
+            obstaculos[i].move_para(int(width/2+90*cos(alfa)) - i*20,
+                                    int(height/2+90*sin(alfa)) + (i*width/2) - 200);
+            alfa += PI/200;
+        } else {
+            // movimento aleatorio
+            obstaculos[i].move_para(obstaculos[i].getX()+v1, obstaculos[i].getY()+v2);
+            if (obstaculos[i].getX() >= width-10) {
+                v1 = -v1;
+            }
+            if (obstaculos[i].getY() >= height-10){
+                v2 = -v2;
+            }
+            if (obstaculos[i].getX() <= 10) {
+                v1 = -v1;
+            }
+            if (obstaculos[i].getY() <= 10){
+                v2 = -v2;
+            }
         }
         obstaculos[i].draw();
     }
-
     player.draw();
 
     // rect branco de fundo
     fill(255, 200);
-    rect(tlWidth/2, 0, tlWidth+10, 150, 40);
+    rect(width/2, 0, width+10, 150, 40);
     noFill();
 
     // mostra quanto o player tem de HP
@@ -217,13 +235,12 @@ void draw() {
 
     // mostra quantas bolas foram coletadas
     fill(0);
-    text(player_pontos+" golos", tlWidth-100, 50);
+    text(player_pontos+" golos", width-100, 50);
     noFill();
-
 }
 
 void keyPressed() {
-    player.move(keyCode, tlWidth, tlHeight);
+    player.move(keyCode, width, height);
 }
 
 void mousePressed() {

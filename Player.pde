@@ -38,6 +38,17 @@ class Player {
         else if (pos == UP && this.y-this.dt > 0) this.y -= this.dt;
     }
 
+    void move_para(int x, int y) {
+        if (x < 0) {
+            this.y = y;
+        } else if (y < 0) {
+            this.x = x;
+        } else {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
     // checar se o (posx, posy) colide com as coords do objeto
     boolean colide(int posx, int posy) {
         int xcalc = posx - this.x;
@@ -49,5 +60,4 @@ class Player {
             return false;
         }
     }
-
 }
