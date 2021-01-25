@@ -132,7 +132,7 @@ void setup() {
         clones[i] = new Player(clone_img, randx, randy, clones_width);
     }
 
-    obstaculos = new Player[3];
+    obstaculos = new Player[1];
     for (int i = 0; i < obstaculos.length; i++) {
         int randx = int(random(60, tlWidth-60));
         int randy = int(random(60, tlHeight-60));
@@ -154,6 +154,7 @@ void draw() {
         player_pontos = 0;
         player_hp += 1;
         nNivel += 1;
+        obstaculos = (Player[])expand(obstaculos, obstaculos.length+2);
         if (nNivel > campos_img.length) {
             // ganhou o jogo
             tela = telas[6];
@@ -185,6 +186,7 @@ void draw() {
 
     // atualizar obstaculos
     for (int i = 0; i < obstaculos.length; i++) {
+        // inicializar obstaculo, caso seja nulo
         if (obstaculos[i] == null) {
             int randx = int(random(60, tlWidth-60));
             int randy = int(random(60, tlHeight-60));
