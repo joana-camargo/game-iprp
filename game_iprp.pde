@@ -145,6 +145,7 @@ void draw() {
         tela.draw();
         aud_perder.play();
         resetGame();
+        player_pontos = 0;
         return;
     } else if (player_pontos >= nNivel*5) {
         player_hp += 1;
