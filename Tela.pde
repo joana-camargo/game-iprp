@@ -15,7 +15,10 @@ class Tela {
 
     void draw() {
         background(this.bg);
-        for (Botao b : botoes) b.draw();
+        for (int i = 0; i < this.botoes.length; i++) {
+            Botao b = this.botoes[i];
+            b.draw();
+        }
     }
 
     void setBg(PImage bg) {

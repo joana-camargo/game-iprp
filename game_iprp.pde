@@ -34,6 +34,7 @@ int player_pontos = 0;
 int player_hp = 3;
 int nNivel = 1;
 
+//obstaculos
 int mv_offset = 0;
 float alfa = 0;
 int v1=3;
@@ -245,7 +246,8 @@ void keyPressed() {
 }
 
 void mousePressed() {
-    for (Botao b : tela.botoes) {
+    for (int i = 0; i < tela.botoes.length; i++) {
+        Botao b = tela.botoes[i];
         int rval = b.colide(mouseX, mouseY);
         if (rval == 0 && tela.id == 0) {
             exit();
@@ -253,11 +255,11 @@ void mousePressed() {
         } else if (rval >= 0) {
             if (rval >= 20) {
                 telas[4].setBg(campos_img[rval-20]);
-                // vai para a tela de times
+              //vai pra tela dos niveis
                 tela = telas[4];
             } else if (rval >= 10) {
                 player.setSprite(times_img[rval-10]);
-                // volta para a tela do menu principal
+              //vai pra tela dos campos
                 tela = telas[1];
             } else {
                 tela = telas[rval];
