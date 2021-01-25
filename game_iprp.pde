@@ -146,19 +146,19 @@ void draw() {
         aud_perder.play();
         resetGame();
         return;
-    } else if (player_pontos >= nNivel*2) {
-        player_pontos = 0;
+    } else if (player_pontos >= nNivel*5) {
         player_hp += 1;
         nNivel += 1;
-        obstaculos = (Player[])expand(obstaculos, obstaculos.length+2);
         if (nNivel > campos_img.length) {
             // ganhou o jogo
             tela = telas[6];
             tela.draw();
             aud_ganhar.play();
             resetGame();
+            player_pontos = 0;
             return;
         }
+        obstaculos = (Player[])expand(obstaculos, obstaculos.length+2);
         tela.setBg(campos_img[nNivel-1]);
     }
 
@@ -269,7 +269,6 @@ void mousePressed() {
 
 void resetGame() {
     nNivel = 1;
-    player_pontos = 0;
     player_hp = 3;
     mv_offset = 0;
     alfa = 0;
