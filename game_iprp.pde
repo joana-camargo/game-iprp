@@ -4,12 +4,12 @@ PImage[] campos_img;
 PImage[] times_img;
 String[] times_nome;
 
-PImage clone_img;
+PImage bolas_img;
 PImage cone_img;
 PImage taca_img;
 
 Player player;
-Player[] clones;
+Player[] bolas;
 Player[] obstaculos;
 
 Tela tela;
@@ -27,14 +27,15 @@ PFont mainFont;
 int xcentro;
 int ycentro;
 
-int clones_width = 35;
-int obstaculos_width = clones_width*2;
+int bolas_width = 35;
+int obstaculos_width = bolas_width*2;
 
+//variaveis iniciais
 int player_pontos = 0;
 int player_hp = 3;
 int nNivel = 1;
 
-//obstaculos
+//variaveis pro obstaculos
 int mv_offset = 0;
 float alfa = 0;
 int v1=3;
@@ -60,7 +61,7 @@ void setup() {
     PImage tlPerder = loadImage("img/perder.png");
     PImage tlGanhar = loadImage("img/ganhar.png");
 
-    clone_img = loadImage("img/bola.png");
+    bolas_img = loadImage("img/bola.png");
     cone_img = loadImage("img/cone.png");
     taca_img = loadImage("img/taca.png");
 
@@ -127,13 +128,13 @@ void setup() {
 
     player = new Player(times_img[0], xcentro, ycentro+ycentro/2);
 
-    // tamanho do array = numero max. de clones
+    // tamanho do array = numero max. de bolas
     obstaculos = new Player[1];
-    clones = new Player[5];
-    for (int i = 0; i < clones.length; i++) {
+    bolas = new Player[5];
+    for (int i = 0; i < bolas.length; i++) {
         int randx = int(random(60, width-60));
         int randy = int(random(60, height-60));
-        clones[i] = new Player(clone_img, randx, randy, clones_width);
+        bolas[i] = new Player(bolas_img, randx, randy, bolas_width);
     }
 
     aud_ponto.play();
@@ -148,7 +149,8 @@ void draw() {
         resetGame();
         player_pontos = 0;
         return;
-    } else if (player_pontos >= nNivel*5) {
+      } else if (player_pontos >= nNivel*5) {
+        //passar de nivel
         player_hp += 1;
         nNivel += 1;
         delay(500);
@@ -168,19 +170,19 @@ void draw() {
     if (tela.id != 4) return;
     tela.draw();
 
-    // atualizar clones
-    for (int i = 0; i < clones.length; i++) {
-        // quando colidir, deletar o clone adicionar +1 ponto e criar um novo clone
-        if (clones[i].colide(player.getX(), player.getY())) {
-            // usar 60 como margem, mantendo os clones longes da beirada
+    // atualizar bolas
+    for (int i = 0; i < bolas.length; i++) {
+        // quando colidir, deletar a bola adicionar +1 ponto e criar uma nova bola
+        if (bolas[i].colide(player.getX(), player.getY())) {
+            // usar 60 como margem, mantendo as bolas longes da beirada
             int randx = int(random(60, width-60));
             int randy = int(random(60, height-60));
-            clones[i] = new Player(clone_img, randx, randy, clones_width);
+            bolas[i] = new Player(bolas_img, randx, randy, bolas_width);
             player_pontos += 1;
             aud_ponto.play();
             break;
         }
-        clones[i].draw();
+        bolas[i].draw();
     }
 
     // atualizar obstaculos
@@ -188,7 +190,7 @@ void draw() {
         if (obstaculos[i] == null) {
             obstaculos[i] = new Player(cone_img, int(random(width)), int(random(height)), obstaculos_width);
         } else if (obstaculos[i].colide(player.getX(), player.getY())) {
-            // quando colidir, deletar o clone subtrair 1 de player_hp e criar um novo clone
+            // quando colidir, deletar o cone subtrair 1 de player_hp e criar um novo cone
             obstaculos[i] = new Player(cone_img, int(random(width)), int(random(height)), obstaculos_width);
             player.move_para(-1, (player.getY() + 70)%height);
             player_hp -= 1;
